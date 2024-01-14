@@ -14,7 +14,7 @@ dealSound = file.loadSound("/sys/sounds/ting.wav")
 errorSound = file.loadSound("/sys/sounds/blipA4.wav")
 undoSound = file.loadSound("/sys/sounds/swoosh.wav")
 
-// creat Card obj
+// create Card obj
 cardRank = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 Card = []
 for i in range(0, 13)
@@ -50,14 +50,14 @@ inside = function(n, a, b)
 end function
 
 // functions
-creatButtons = function
-	// creat doneScreen
+createButtons = function
+	// create doneScreen
 	doneScreen = new Card[13]
 	doneScreen.tint = doneScreenColor
 	doneScreen.x = 60; doneScreen.y = 40
 	buttonDisp.sprites.push doneScreen
 
-	// creat dealButton
+	// create dealButton
 	dealButton = new Card[13]
 	dealButton.tint = dealButtonColor
 	dealButton.x = 900; dealButton.y = 40
@@ -67,7 +67,7 @@ creatButtons = function
 	dealButton.localBounds.height = dealButton.image.height
 	buttonDisp.sprites.push dealButton
 
-	// creat undoButton
+	// create undoButton
 	undoButton = new Card[13]
 	undoButton.tint = undoButtonColor
 	undoButton.x = 900; undoButton.y = 80
@@ -77,8 +77,8 @@ creatButtons = function
 	undoButton.localBounds.height = undoButton.image.height
 	buttonDisp.sprites.push undoButton
 end function
-creatCardsGraph = function
-	// creat heaps graph
+createCardsGraph = function
+	// create heaps graph
 	for i in heap.indexes
 		for j in heap[i].indexes
 			tmp = [13, heap[i][j]][j>invis[i]]
@@ -94,7 +94,7 @@ creatCardsGraph = function
 		end for
 	end for
 
-	// creat holding-cards graph
+	// create holding-cards graph
 	for i in hold.indexes
 		card = new Card[hold[i]]
 		card.x = mouse.x
@@ -211,8 +211,8 @@ update = function
 		gfx.print "Unable to deal cards when there are vacancies.", 160, 270, color.white
 	end if
 
-	// creat cards graph
-	creatCardsGraph
+	// create cards graph
+	createCardsGraph
 end function
 init = function
 	// graph preparation
@@ -224,8 +224,8 @@ init = function
 	globals.heapDisp = display(7); heapDisp.sprites = []
 	globals.doneNum = 0; globals.showTip = 0
 
-	// creat buttons
-	creatButtons
+	// create buttons
+	createButtons
 
 	// cards preparation
 	cards = []
