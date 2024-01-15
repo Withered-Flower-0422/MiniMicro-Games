@@ -205,12 +205,12 @@ update = function
 	f.print doneNum, 49, 27, 1.5, doneScreenTextColor
 	f.print "<-", 877, 67, 1.5, undoButtonTextColor
 	
-	// show  error tip
+	// show error tip
 	if showTip then
 		globals.showTip = 0
 		gfx.print "Unable to deal cards when there are vacancies.", 160, 270, color.white
 	end if
-
+	
 	// create cards graph
 	createCardsGraph
 end function
@@ -222,23 +222,23 @@ init = function
 	globals.buttonDisp = display(6); buttonDisp.sprites = []
 	globals.holdDisp = display(4); holdDisp.sprites = []
 	globals.heapDisp = display(7); heapDisp.sprites = []
-	globals.doneNum = 0; globals.showTip = 0
-
+	
 	// create buttons
 	createButtons
-
+	
 	// cards preparation
 	cards = []
 	for i in range(12)
 		cards += [i] * 8
 	end for
 	cards.shuffle
-
+	
 	// global var preparation
+	globals.doneNum = 0; globals.showTip = 0
 	globals.heap = []; globals.remain = []
 	globals.hold = []; globals.cache = []
 	globals.invis = [4] * 4 + [3] * 6
-
+	
 	// deal initial cards
 	for i in range(0, 9)
 		cnt = [5, 6][i<4]; tmp = []
@@ -254,10 +254,10 @@ init = function
 		end for
 		remain.push tmp[:]
 	end for
-
+	
 	// initial update
 	update
-
+	
 	// save initial scene
 	saveScene
 end function
