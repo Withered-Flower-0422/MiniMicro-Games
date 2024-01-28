@@ -233,6 +233,7 @@ explore = function(id)
 	end while
 end function
 exploreAround = function(id)
+	if not sp[toIndex(id)].discovered then return
 	markNum = 0; noFlag = []; around = getAround(id)
 	undiscoveredAround = []
 	for aid in around
