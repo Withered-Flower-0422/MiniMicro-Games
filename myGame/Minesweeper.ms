@@ -1,101 +1,99 @@
 // Minesweeper
 
-// import libraries
-import "listUtil"
-import "bmfFonts"
-import "stringUtil"
-import "mathUtil"
+// libraries
+	import "listUtil"
+	import "bmfFonts"
+	import "stringUtil"
+	import "mathUtil"
 
-f = bmfFonts.Font.load("/sys/fonts/minimicro-pro-20.bmf")
+	f = bmfFonts.Font.load("/sys/fonts/minimicro-pro-20.bmf")
 
 // SFX
-WIN_SOUND = file.loadSound("/sys/sounds/fanfare.wav")
-BOOM_SOUND = file.loadSound("/sys/sounds/airburst.wav")
-EXPOLRE_SOUND = file.loadSound("/sys/sounds/pop.wav")
+	WIN_SOUND = file.loadSound("/sys/sounds/fanfare.wav")
+	BOOM_SOUND = file.loadSound("/sys/sounds/airburst.wav")
+	EXPOLRE_SOUND = file.loadSound("/sys/sounds/pop.wav")
 
 // config
 	// image config
-BLOCK_TILES = file.loadImage("/sys/pics/blockTiles.png")
+		BLOCK_IMAGE = file.loadImage("/sys/pics/Block.png")
 
-DISCOVERED_IMAGE = BLOCK_TILES.getImage(96, 0, 32, 32)
-UNDISCOVERED_IMAGE = BLOCK_TILES.getImage(0, 96, 32, 32)
-
-BAR_IMAGE = file.loadImage("/sys/pics/Block4.png")
-BUTTON_IMAGE = file.loadImage("/sys/pics/Block2.png")
+		BAR_IMAGE = file.loadImage("/sys/pics/Block4.png")
+		BUTTON_IMAGE = file.loadImage("/sys/pics/Block2.png")
 
 	// char config
-NULL = ""
-MINE = "*"
-FLAG = char(161)
-UNCERTAIN = "?"
-OFFSET_X = 8; OFFSET_Y = 8
+		NULL = ""
+		MINE = "*"
+		FLAG = char(161)
+		UNCERTAIN = "?"
+		OFFSET_X = 8; OFFSET_Y = 8
 
 	// color config
-DISCOVERED_COLOR = "#C0C0C0FF"
-UNDISCOVERED_COLOR = "#80D2FFFF"
-NUM_COLOR = [
-	color.clear, color.blue, color.green,
-	color.red, color.navy, color.maroon, 
-	color.aqua, color.black, color.silver]
-MARK_COLOR = {
-	NULL: color.clear,
-	MINE: [color.black, color.red],
-	FLAG: color.red,
-	UNCERTAIN: color.black}
+		DISCOVERED_COLOR = color.white
+		UNDISCOVERED_COLOR = rgb(128, 192, 255)
+		NUM_COLOR = [
+			color.clear, color.blue, color.green,
+			color.red, color.navy, color.maroon, 
+			color.aqua, color.black, color.silver]
+		MARK_COLOR = {
+			NULL: color.clear,
+			MINE: [color.black, color.red],
+			FLAG: color.red,
+			UNCERTAIN: color.black}
 
-BAR_COLOR = color.silver
-SELECT_COLOR = color.gray
-BUTTON_COLOR = color.silver
-TEXT_COLOR = {
-	"easy": color.lime,
-	"medium": color.aqua,
-	"hard": color.red,
-	"custom": color.black,
-	"row_title": color.orange,
-	"column_title": color.orange,
-	"mine_title": color.orange,
-	"row": color.lime,
-	"column": color.aqua,
-	"mine": color.red,
-	"restart": color.lime,
-	"exit": color.red,
-	"die": color.red,
-	"win": color.lime,
-	"thanks": color.pink}
+		BAR_COLOR = color.silver
+		SELECT_COLOR = color.gray
+		BUTTON_COLOR = color.silver
+		TEXT_COLOR = {
+			"easy": color.lime,
+			"medium": color.aqua,
+			"hard": color.red,
+			"custom": color.black,
+			"row_title": color.orange,
+			"column_title": color.orange,
+			"mine_title": color.orange,
+			"row": color.lime,
+			"column": color.aqua,
+			"mine": color.red,
+			"restart": color.lime,
+			"exit": color.red,
+			"die": color.red,
+			"win": color.lime,
+			"thanks": color.pink}
 
 // creat obj
-Zone = new Sprite
-Zone.markList = [NULL, FLAG, UNCERTAIN]
-Zone.init = function
-	self.isMine = 0
-	self.discovered = 0
-	self.markIndex = 0
-end function
-Zone.update = function
-	if self.discovered then
-		self.image = DISCOVERED_IMAGE
-		self.tint = DISCOVERED_COLOR
-		if self.isMine then
-			clr = MARK_COLOR[MINE][isDie]
-			f.print MINE, self.x-OFFSET_X, self.y-OFFSET_Y, 1, clr
-			return
+	Zone = new Sprite
+	Zone.image = BLOCK_IMAGE
+	Zone.markList = [NULL, FLAG, UNCERTAIN]
+	Zone.init = function
+		self.isMine = 0
+		self.discovered = 0
+		self.markIndex = 0
+	end function
+	Zone.update = function
+		if self.discovered then
+			self.tint = DISCOVERED_COLOR
+			if self.isMine then
+				clr = MARK_COLOR[MINE][isDie]
+				gfx.fillRect self.x-16, self.y-16, 32, 32, color.clear
+				f.print MINE, self.x-OFFSET_X, self.y-OFFSET_Y, 1, clr
+				return
+			end if
+			f.print self.num, self.x-OFFSET_X, self.y-OFFSET_Y, 1, NUM_COLOR[self.num]
+		else
+			self.tint = UNDISCOVERED_COLOR
+			mark = Zone.markList[self.markIndex]
+			gfx.fillRect self.x-16, self.y-16, 32, 32, color.clear
+			f.print mark, self.x-OFFSET_X, self.y-OFFSET_Y, 1, MARK_COLOR[mark]
 		end if
-		f.print self.num, self.x-OFFSET_X, self.y-OFFSET_Y, 1, NUM_COLOR[self.num]
-	else
-		self.image = UNDISCOVERED_IMAGE
-		self.tint = UNDISCOVERED_COLOR
-		mark = Zone.markList[self.markIndex]
-		f.print mark, self.x-OFFSET_X, self.y-OFFSET_Y, 1, MARK_COLOR[mark]
-	end if
-end function
+	end function
 
 // helper functions
-inRange = function(id)
-	return 0 <= id[0] < row and 0 <= id[1] < clm
-end function
-toIndex = function(id)
-	return clm * id[0] + id[1]
-end function
+	inRange = function(id)
+		return 0 <= id[0] < row and 0 <= id[1] < clm
+	end function
+	toIndex = function(id)
+		return clm * id[0] + id[1]
+	end function
 
 // functions
 getSelfNum = function(id)
@@ -108,9 +106,11 @@ end function
 mark = function(id)
 	index = toIndex(id)
 	if not sp[index].discovered then
-		gfx.fillRect sp[index].x-16, sp[index].y-16, sp[index].x+16, sp[index].y+16, color.clear
 		sp[index].markIndex += 1 
 		sp[index].markIndex %= 3
+		sp[index].update
+		text.row = 25; text.column = 0
+		text.print "Mine: " + (mineNum - getFlagNum) + " " * 10
 	end if
 end function
 pressButton = function
@@ -123,8 +123,7 @@ end function
 click = function
 	if mouse.button(0) then
 		chosen = underMouse
-		while mouse.button(0)
-			if start then timeUpdate
+		while mouse.button(0); if start then timeUpdate
 			if mouse.button(1) and chosen == underMouse then
 				while mouse.button(1); if start then timeUpdate; end while
 				if chosen == underMouse then return [chosen, "bothClick"]
@@ -133,8 +132,7 @@ click = function
 		if chosen == underMouse then return [chosen, "leftClick"]
 	else if mouse.button(1) then
 		chosen = underMouse
-		while mouse.button(1)
-			if start then timeUpdate
+		while mouse.button(1); if start then timeUpdate
 			if mouse.button(0) and chosen == underMouse then
 				while mouse.button(0); if start then timeUpdate; end while
 				if chosen == underMouse then return [chosen, "bothClick"]
@@ -177,6 +175,7 @@ createMineZone = function(r, c)
 			zone.id = [i, j]
 			zone.x = 496 - 16 * clm + 32 * j
 			zone.y = 304 + 16 * row - 32 * i
+			zone.scale = 0.5
 			zone.init; zone.update
 			zone.localBounds = new Bounds
 			zone.localBounds.width = zone.image.width
@@ -197,7 +196,6 @@ generateMines = function(id)
 	globals.firstClick = 0
 	globals.start = 1
 	globals.startTime = time
-	globals.dt = startTime
 	around = getAround(id)
 	tmp = sp.indexes
 	tmp.removeVal toIndex(id)
@@ -219,7 +217,7 @@ explore = function(id)
 	q = {id: 1}
 	while q
 		id = q.pop; index = toIndex(id)
-		sp[index].discovered = 1; EXPOLRE_SOUND.play
+		sp[index].discovered = 1; sp[index].update; EXPOLRE_SOUND.play
 		if sp[index].isMine then
 			globals.isDie = 1
 			return
@@ -250,22 +248,17 @@ exploreAround = function(id)
 		end for
 	end if
 end function
-update = function
+getFlagNum = function
 	flagNum = 0
 	for s in sp
-		s.update
 		if s.markIndex == 1 then flagNum += 1
 	end for
-	gfx.line 0, 630, 480, 630, color.clear, 40
-	f.print "Mine: " + (mineNum - flagNum), 0, 620, 1, color.white
+	return flagNum
 end function
 timeUpdate = function
-	if time - dt >= 0.01 then
-		globals.dt = time
-		gfx.line 480, 630, 960, 630, color.clear, 40
-		data = "Time: " + mathUtil.numToStr(time - startTime, 2)
-		f.print data, 800-16*(data.len-10), 620, 1, color.white
-	end if
+	data = "Time: " + mathUtil.numToStr(time - startTime, 2)
+	text.row = 25; text.column = 68 - data.len
+	text.print data
 end function
 update_pre = function
 	gfx.line 300, 260, 500, 260, color.clear, 300
@@ -285,16 +278,11 @@ end function
 win = function
 	WIN_SOUND.play
 	globals.endTime = time
-	gfx.fillRect 0, 0, 960, 608, color.clear
-	for s in sp
-		s.discovered = 1
-		if s.isMine then s.image = UNDISCOVERED_IMAGE
-	end for
-	update
 	for s in sp
 		if s.isMine then
-			s.image = UNDISCOVERED_IMAGE
-			s.tint = UNDISCOVERED_COLOR
+			clr = MARK_COLOR[MINE][isDie]
+			gfx.fillRect s.x-16, s.y-16, 32, 32, color.clear
+			f.print MINE, s.x-OFFSET_X, s.y-OFFSET_Y, 1, clr
 		end if
 	end for
 	gameOver "win"
@@ -305,16 +293,17 @@ die = function
 	gfx.fillRect 0, 0, 960, 608, color.clear
 	for s in sp
 		s.discovered = 1
+		s.update
 	end for
-	update
 	gameOver "die"
 end function
 gameOver = function(state)
-	gfx.line 0, 630, 960, 630, color.clear, 40
-	f.print "Mine: 0", 0, 620, 1, color.white
+	text.row = 25; text.column = 0
+	text.print "Mine: 0" + " " * 10
 	data = "Time: " + mathUtil.numToStr(endTime - startTime, 2)
-	f.print data, 800-16*(data.len-10), 620, 1, color.white
-
+	text.row = 25; text.column = 68 - data.len
+	text.print data
+	
 	// restart
 	Button = new Sprite 
 	Button.image = BAR_IMAGE
@@ -327,7 +316,7 @@ gameOver = function(state)
 	Button.localBounds.height = Button.image.height
 	f.print Button.id, Button.x-Button.id.len*5-2, Button.y-5, 0.8, TEXT_COLOR[Button.id]
 	sp.push Button
-
+	
 	// exit
 	Button = new Sprite 
 	Button.image = BUTTON_IMAGE
@@ -340,7 +329,7 @@ gameOver = function(state)
 	Button.localBounds.height = Button.image.height
 	f.print Button.id, Button.x-Button.id.len*5, Button.y-5, 0.8, TEXT_COLOR[Button.id]
 	sp.push Button
-
+	
 	while 1
 		chosen = pressButton
 		if chosen =="restart" then 
@@ -348,10 +337,10 @@ gameOver = function(state)
 			break
 		else if chosen == "exit" then
 			key.clear
-			print; print
+			text.row = 23
 			text.color = TEXT_COLOR[state]
 			if state == "win" then
-				text.print "Finish in " + round(endTime - startTime, 2) + " seconds."
+				text.print "Finish in " + mathUtil.numToStr(endTime - startTime, 2) + " seconds."
 			else if state == "die" then
 				text.print "Fail."
 			end if
@@ -378,7 +367,7 @@ createButtons = function
 		f.print Button.id, Button.x-Button.id.len*10+3, Button.y-10, 1.2, TEXT_COLOR[Button.id]
 		sp.push Button
 	end for
-
+	
 	f.print "Row: ", 100, 350, 1.2, TEXT_COLOR.row_title
 	f.print "Column: ", 100, 250, 1.2, TEXT_COLOR.row_title
 	f.print "Mine: ", 100, 150, 1.2, TEXT_COLOR.row_title
@@ -398,7 +387,7 @@ createButtons = function
 	end for
 	globals.select = globals.bar.row
 	select.tint = SELECT_COLOR
-
+	
 	Button = new Sprite 
 	Button.image = BUTTON_IMAGE
 	Button.x = 700; Button.y = 260
@@ -413,7 +402,7 @@ createButtons = function
 end function 
 init = function
 	// difficulty selection
-	clear
+	clear; text.color = color.white
 	display(6).mode = displayMode.sprite; display(5).clear
 	display(6).sprites = []; globals.sp = display(6).sprites
 	globals.bar = {}
@@ -458,15 +447,16 @@ init = function
 				barNum[select.id] = ""
 			else
 				if barNum[select.id].len < 3 then barNum[select.id] += pressKey
+				if barNum[select.id].len > 1 and barNum[select.id][0] == "0" then barNum[select.id] = barNum[select.id][1:]
 			end if
 			update_pre
 		end if
 		yield
 	end while
-
+	
 	// init 
 	clear
-
+	
 	// disp config
 	display(6).mode = displayMode.sprite
 	globals.tileDisp = display(6); tileDisp.sprites = []; globals.sp = tileDisp.sprites
@@ -481,8 +471,13 @@ init = function
 	globals.start = 0
 	createMineZone row, clm
 	
-	update
-	f.print "Time: 0.00", 800, 620, 1, color.white
+	for s in sp
+		s.update
+	end for
+	text.row = 25; text.column = 0
+	text.print "Mine: " + mineNum + " " * 10
+	text.row = 25; text.column = 58
+	text.print "Time: 0.00"
 end function
 
 // Main loop
@@ -500,7 +495,7 @@ while 1
 		else if act == "rightClick" then
 			mark id
 		end if
-		update; if isDie then die; if isWin then win
+		if isDie then die; if isWin then win
 	end if
 	yield
 end while
