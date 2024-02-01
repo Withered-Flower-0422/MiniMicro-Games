@@ -1,99 +1,101 @@
 // Minesweeper
 
 // libraries
-	import "listUtil"
-	import "bmfFonts"
-	import "stringUtil"
-	import "mathUtil"
+import "listUtil"
+import "bmfFonts"
+import "stringUtil"
+import "mathUtil"
 
-	f = bmfFonts.Font.load("/sys/fonts/minimicro-pro-20.bmf")
+f = bmfFonts.Font.load("/sys/fonts/minimicro-pro-20.bmf")
 
 // SFX
-	WIN_SOUND = file.loadSound("/sys/sounds/fanfare.wav")
-	BOOM_SOUND = file.loadSound("/sys/sounds/airburst.wav")
-	EXPOLRE_SOUND = file.loadSound("/sys/sounds/pop.wav")
+WIN_SOUND = file.loadSound("/sys/sounds/fanfare.wav")
+BOOM_SOUND = file.loadSound("/sys/sounds/airburst.wav")
+EXPOLRE_SOUND = file.loadSound("/sys/sounds/pop.wav")
 
 // config
-	// image config
-		BLOCK_IMAGE = file.loadImage("/sys/pics/Block.png")
+// image config
+BLOCK_IMAGE = file.loadImage("/sys/pics/Block.png")
 
-		BAR_IMAGE = file.loadImage("/sys/pics/Block4.png")
-		BUTTON_IMAGE = file.loadImage("/sys/pics/Block2.png")
+BAR_IMAGE = file.loadImage("/sys/pics/Block4.png")
+BUTTON_IMAGE = file.loadImage("/sys/pics/Block2.png")
 
-	// char config
-		NULL = ""
-		MINE = "*"
-		FLAG = char(161)
-		UNCERTAIN = "?"
-		OFFSET_X = 8; OFFSET_Y = 8
+// char config
+NULL = ""
+MINE = "*"
+FLAG = char(161)
+UNCERTAIN = "?"
+OFFSET_X = 8; OFFSET_Y = 8
 
-	// color config
-		DISCOVERED_COLOR = color.white
-		UNDISCOVERED_COLOR = rgb(128, 192, 255)
-		NUM_COLOR = [
-			color.clear, color.blue, color.green,
-			color.red, color.navy, color.maroon, 
-			color.aqua, color.black, color.silver]
-		MARK_COLOR = {
-			NULL: color.clear,
-			MINE: [color.black, color.red],
-			FLAG: color.red,
-			UNCERTAIN: color.black}
+// color config
+BACKGROUND_COLOR = "#333333FF"
 
-		BAR_COLOR = color.silver
-		SELECT_COLOR = color.gray
-		BUTTON_COLOR = color.silver
-		TEXT_COLOR = {
-			"easy": color.lime,
-			"medium": color.aqua,
-			"hard": color.red,
-			"custom": color.black,
-			"row_title": color.orange,
-			"column_title": color.orange,
-			"mine_title": color.orange,
-			"row": color.lime,
-			"column": color.aqua,
-			"mine": color.red,
-			"restart": color.lime,
-			"exit": color.red,
-			"die": color.red,
-			"win": color.lime,
-			"thanks": color.pink}
+DISCOVERED_COLOR = color.white
+UNDISCOVERED_COLOR = rgb(128, 192, 255)
+NUM_COLOR = [
+color.clear, color.blue, color.green,
+color.red, color.navy, color.maroon, 
+color.aqua, color.black, color.silver]
+MARK_COLOR = {
+NULL: color.clear,
+MINE: [color.black, color.red],
+FLAG: color.red,
+UNCERTAIN: color.black}
+
+BAR_COLOR = color.silver
+SELECT_COLOR = color.gray
+BUTTON_COLOR = color.silver
+TEXT_COLOR = {
+"easy": color.lime,
+"medium": color.aqua,
+"hard": color.red,
+"custom": color.black,
+"row_title": color.orange,
+"column_title": color.orange,
+"mine_title": color.orange,
+"row": color.lime,
+"column": color.aqua,
+"mine": color.red,
+"restart": color.lime,
+"exit": color.red,
+"die": color.red,
+"win": color.lime,
+"thanks": color.pink}
 
 // creat obj
-	Zone = new Sprite
-	Zone.image = BLOCK_IMAGE
-	Zone.markList = [NULL, FLAG, UNCERTAIN]
-	Zone.init = function
-		self.isMine = 0
-		self.discovered = 0
-		self.markIndex = 0
-	end function
-	Zone.update = function
-		if self.discovered then
-			self.tint = DISCOVERED_COLOR
-			if self.isMine then
-				clr = MARK_COLOR[MINE][isDie]
-				gfx.fillRect self.x-16, self.y-16, 32, 32, color.clear
-				f.print MINE, self.x-OFFSET_X, self.y-OFFSET_Y, 1, clr
-				return
-			end if
-			f.print self.num, self.x-OFFSET_X, self.y-OFFSET_Y, 1, NUM_COLOR[self.num]
-		else
-			self.tint = UNDISCOVERED_COLOR
-			mark = Zone.markList[self.markIndex]
+Zone = new Sprite
+Zone.image = BLOCK_IMAGE
+Zone.markList = [NULL, FLAG, UNCERTAIN]
+Zone.init = function
+	self.isMine = 0
+	self.discovered = 0
+	self.markIndex = 0
+end function
+Zone.update = function
+	if self.discovered then
+		self.tint = DISCOVERED_COLOR
+		if self.isMine then
+			clr = MARK_COLOR[MINE][isDie]
 			gfx.fillRect self.x-16, self.y-16, 32, 32, color.clear
-			f.print mark, self.x-OFFSET_X, self.y-OFFSET_Y, 1, MARK_COLOR[mark]
+			f.print MINE, self.x-OFFSET_X, self.y-OFFSET_Y, 1, clr
+			return
 		end if
-	end function
+		f.print self.num, self.x-OFFSET_X, self.y-OFFSET_Y, 1, NUM_COLOR[self.num]
+	else
+		self.tint = UNDISCOVERED_COLOR
+		mark = Zone.markList[self.markIndex]
+		gfx.fillRect self.x-16, self.y-16, 32, 32, color.clear
+		f.print mark, self.x-OFFSET_X, self.y-OFFSET_Y, 1, MARK_COLOR[mark]
+	end if
+end function
 
 // helper functions
-	inRange = function(id)
-		return 0 <= id[0] < row and 0 <= id[1] < clm
-	end function
-	toIndex = function(id)
-		return clm * id[0] + id[1]
-	end function
+inRange = function(id)
+	return 0 <= id[0] < row and 0 <= id[1] < clm
+end function
+toIndex = function(id)
+	return clm * id[0] + id[1]
+end function
 
 // functions
 getSelfNum = function(id)
@@ -187,10 +189,10 @@ end function
 getAround = function(id)
 	r = id[0]; c = id[1]
 	return [
-		[r-1, c-1], [r-1, c], [r-1, c+1], 
-		[r, c-1], [r, c+1], 
-		[r+1, c-1], [r+1, c], [r+1, c+1], 
-		].filtered(@inRange)
+	[r-1, c-1], [r-1, c], [r-1, c+1], 
+	[r, c-1], [r, c+1], 
+	[r+1, c-1], [r+1, c], [r+1, c+1], 
+	].filtered(@inRange)
 end function
 generateMines = function(id)
 	globals.firstClick = 0
@@ -213,7 +215,7 @@ generateMines = function(id)
 end function
 explore = function(id)
 	index = toIndex(id)
- 	if sp[index].discovered or sp[index].markIndex != 0 then return
+	if sp[index].discovered or sp[index].markIndex != 0 then return
 	q = {id: 1}
 	while q
 		id = q.pop; index = toIndex(id)
@@ -403,6 +405,8 @@ end function
 init = function
 	// difficulty selection
 	clear; text.color = color.white
+	display(7).mode = displayMode.solidColor
+	display(7).color = BACKGROUND_COLOR
 	display(6).mode = displayMode.sprite; display(5).clear
 	display(6).sprites = []; globals.sp = display(6).sprites
 	globals.bar = {}
@@ -456,6 +460,8 @@ init = function
 	
 	// init 
 	clear
+	display(7).mode = displayMode.solidColor
+	display(7).color = BACKGROUND_COLOR
 	
 	// disp config
 	display(6).mode = displayMode.sprite
